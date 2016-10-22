@@ -1,3 +1,9 @@
+/************************************************************
+ * Nome Aluno: Bruno Luis Panuto Silva RA: 1510029160 *
+ * Nome Aluno: Leonardo Silva RA: *
+ * Data: 20/09/2016 *
+*************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,7 +53,22 @@ void handle_err(int rc) {
   }
 }
 
-int Produtos_excluir(Produtos*, int);
+int Produtos_excluir(Produtos* P, int code) {
+  int i = 0;
+  for(i = 0; i < P->lim; i++) {
+    int r = P->ps[i].codigo == code;
+    if(r == 1) {
+      int j = 0;
+      for(j = i; j < P->lim; j++) {
+        P->ps[j] = P->ps[j+1];
+      }
+      P->lim--;
+      return SUCCESS;
+    }
+  }
+  return SUCCESS;
+}
+
 int Produtos_buscar_genero(Produtos, char*, void*);
 int Produtos_buscar_nome(Produtos, char*, void*);
 int Produtos_buscar_ano(Produtos, int, void*);
@@ -94,13 +115,20 @@ void cadastrar_produto(Produtos *P) {
   handle_err(rc);
 }
 
-void excluir_produto(Produtos*);
-void buscar_produto(Produtos);
+void excluir_produto(Produtos* P) {
+  printf("*** Excluir produto ***\n");
+  printf("Digite o codigo do produto: ");
+  char code[10];
+  fgets(code, sizeof code, stdin);
+  int c = atoi(code);
+  handle_err(Produtos_excluir(P, c));
+}
+
 void buscar_produto_preco(Produtos);
 void relatorio(Produtos p) {
   int i = 0;
   for(i = 0; i < p.lim; i++) {
-    printf("Nome: %s -- Genero: %s -- Ano: %d -- Preco: %f\n", p.ps[i].nome, p.ps[i].genero, p.ps[i].ano, p.ps[i].preco);
+    printf("Codigo: %d -- Nome: %s -- Genero: %s -- Ano: %d -- Preco: %f\n", p.ps[i].codigo, p.ps[i].nome, p.ps[i].genero, p.ps[i].ano, p.ps[i].preco);
   }
 }
 
@@ -130,7 +158,7 @@ int main() {
       cadastrar_produto(&p);
       break;
     case OP_EXCLUIR:
-      // TODO excluir_produto(&p);
+      excluir_produto(&p);
       break;
     case OP_BUSCAR:
       // TODO buscar_produto(p);
