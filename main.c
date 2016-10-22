@@ -15,6 +15,9 @@
 #define OP_BUSCAR_PRECO 4
 #define OP_RELATORIO 5
 #define OP_SAIR 6
+#define OP_BUSCAR_NOME 1
+#define OP_BUSCAR_GENERO 2
+#define OP_BUSCAR_ANO 3
 
 #define MAX_CHAR 1024
 #define MAX_PRODUCTS 512
@@ -69,9 +72,42 @@ int Produtos_excluir(Produtos* P, int code) {
   return SUCCESS;
 }
 
-int Produtos_buscar_genero(Produtos, char*, void*);
-int Produtos_buscar_nome(Produtos, char*, void*);
-int Produtos_buscar_ano(Produtos, int, void*);
+void Produto_print(Produto P) {
+  printf("Nome: %s -- Genero: %s -- Ano: %d -- Preco: %.2f\n", P.nome, P.genero, P.ano, P.preco);
+}
+
+int Produtos_buscar_genero(Produtos P, char* genero){
+  int i = 0;
+  for (i = 0;i < P.lim; i++) {
+    int r = strcmp(P.ps[i].genero, genero); // r == 0 se nome do produto == nome
+    if (r == 0) {
+      Produto_print(P.ps[i]);
+    }
+  }
+    
+}
+
+int Produtos_buscar_nome(Produtos P, char* nome) {
+  int i = 0;
+  for (i = 0;i < P.lim; i++) {
+    int r = strcmp(P.ps[i].nome, nome); // r == 0 se nome do produto == nome
+    if (r == 0) {
+      Produto_print(P.ps[i]);
+    }
+  }
+    
+}
+
+int Produtos_buscar_ano(Produtos P, int ano){
+  int i = 0;
+  for (i = 0;i < P.lim; i++) {
+    if (P.ps[i].ano == ano) {
+      Produto_print(P.ps[i]);
+    }
+  }
+    
+}
+
 int Produtos_relatorio(Produtos, void*);
 
 void cleanup(char* str) {
@@ -98,7 +134,7 @@ void cadastrar_produto(Produtos *P) {
   cleanup(p.genero);
 
   printf("Digite o ano de fabricacao: ");
-  char ano_buf[4];
+  char ano_buf[5];
   int ano;
   fgets(ano_buf, sizeof ano_buf, stdin);
   ano = atoi(ano_buf);
@@ -115,6 +151,7 @@ void cadastrar_produto(Produtos *P) {
   handle_err(rc);
 }
 
+
 void excluir_produto(Produtos* P) {
   printf("*** Excluir produto ***\n");
   printf("Digite o codigo do produto: ");
@@ -124,11 +161,59 @@ void excluir_produto(Produtos* P) {
   handle_err(Produtos_excluir(P, c));
 }
 
+void buscar_produto_menu() {
+  printf("==== OPCOES DE BUSCA ====\n");
+  printf("1. Buscar por nome\n");
+  printf("2. Buscar por genero\n");
+  printf("3. Buscar por ano\n");
+  printf("6. Voltar para o menu inicial\n");
+}
+
+
+void buscar_produto(Produtos P){
+  int op = 0;
+  char buf[10];
+  buscar_produto_menu();
+  
+  fgets(buf, sizeof buf, stdin);
+  op = atoi(buf);
+  while(op != OP_SAIR) {
+    switch(op) {
+    case OP_BUSCAR_NOME:
+      printf("Digite o nome do produto: ");
+      char nome[MAX_CHAR];
+      fgets(nome, sizeof nome, stdin);
+      cleanup(nome);
+      Produtos_buscar_nome(P, nome);
+      break;
+    case OP_BUSCAR_GENERO:
+      printf("Digite o genero do produto: ");
+      char genero[MAX_CHAR];
+      fgets(genero, sizeof genero, stdin);
+      cleanup(genero);
+      Produtos_buscar_genero(P, genero);
+      break;
+    case OP_BUSCAR_ANO:
+      printf("Digite o ano do produto: ");
+      char ano[MAX_CHAR];
+      int i_ano;
+      fgets(ano, sizeof ano, stdin);
+      i_ano = atoi(ano);
+      Produtos_buscar_ano(P, i_ano);
+      break;
+    }  
+    buscar_produto_menu();
+    fgets(buf, sizeof buf, stdin);
+    op = atoi(buf);
+  }
+}
+
 void buscar_produto_preco(Produtos);
+
 void relatorio(Produtos p) {
   int i = 0;
   for(i = 0; i < p.lim; i++) {
-    printf("Codigo: %d -- Nome: %s -- Genero: %s -- Ano: %d -- Preco: %f\n", p.ps[i].codigo, p.ps[i].nome, p.ps[i].genero, p.ps[i].ano, p.ps[i].preco);
+    Produto_print(p.ps[i]);
   }
 }
 
@@ -145,7 +230,7 @@ void menu() {
 int main() {
   Produtos p;
   p.lim = 0;
-  p.ps = malloc(sizeof(Produto)*MAX_PRODUCTS);
+  p.ps = (Produto*)malloc(sizeof(Produto)*MAX_PRODUCTS);
 
   int op = 0;
   char buf[10];
@@ -161,7 +246,7 @@ int main() {
       excluir_produto(&p);
       break;
     case OP_BUSCAR:
-      // TODO buscar_produto(p);
+      buscar_produto(p);
       break;
     case OP_BUSCAR_PRECO:
       // TODO buscar_produto_preco(p);
