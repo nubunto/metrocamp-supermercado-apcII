@@ -1,6 +1,6 @@
 /************************************************************
  * Nome Aluno: Bruno Luis Panuto Silva RA: 1510029160 *
- * Nome Aluno: Leonardo Silva RA: *
+ * Nome Aluno: Leonardo Silva RA: 1510027479 *
  * Data: 20/09/2016 *
  *************************************************************/
 
@@ -9,6 +9,8 @@
 #include <string.h>
 #include <errno.h>
 
+
+// Opções dos menus
 #define OP_CADASTRAR 1
 #define OP_EXCLUIR 2
 #define OP_BUSCAR 3
@@ -18,9 +20,11 @@
 #define OP_BUSCAR_GENERO 2
 #define OP_BUSCAR_ANO 3
 
+// constantes de tamanho
 #define MAX_CHAR 1024
 #define MAX_PRODUCTS 512
 
+// códigos de erro
 #define SUCCESS 0x5
 #define ERR_FULL 0xf0011
 
@@ -32,11 +36,14 @@ typedef struct Produto {
   float preco;
 } Produto;
 
+// guarda o número de produtos cadastrados
+// e o array de produtos
 typedef struct Produtos {
   int lim;
   Produto *ps;
 } Produtos;
 
+// Cadastra um produto no vetor p->ps
 int Produtos_cadastrar(Produtos *p, Produto c) {
   if (p->lim >= MAX_PRODUCTS) {
     return ERR_FULL;
@@ -46,6 +53,7 @@ int Produtos_cadastrar(Produtos *p, Produto c) {
   return SUCCESS;
 }
 
+// trata o retorno dos erros, caso seja necessário
 void handle_err(int rc) {
   switch(rc) {
   case SUCCESS:
@@ -55,6 +63,8 @@ void handle_err(int rc) {
   }
 }
 
+
+// Exclui um produto do vetor P->ps
 int Produtos_excluir(Produtos* P, int code) {
   int i = 0;
   for(i = 0; i < P->lim; i++) {
@@ -71,32 +81,36 @@ int Produtos_excluir(Produtos* P, int code) {
   return SUCCESS;
 }
 
+
+// Formata um produto na tela
 void Produto_print(Produto P) {
   printf("Nome: %s -- Genero: %s -- Ano: %d -- Preco: %.2f\n", P.nome, P.genero, P.ano, P.preco);
 }
 
+
+// Faz uma busca de produtos por gênero e printa os produtos achados na tela
 int Produtos_buscar_genero(Produtos P, char* genero){
   int i = 0;
   for (i = 0;i < P.lim; i++) {
-    int r = strcmp(P.ps[i].genero, genero); // r == 0 se nome do produto == nome
+    int r = strcmp(P.ps[i].genero, genero);
     if (r == 0) {
       Produto_print(P.ps[i]);
     }
   }
-    
 }
 
+// Faz uma busca de produtos por nome e printa os produtos achados na tela
 int Produtos_buscar_nome(Produtos P, char* nome) {
   int i = 0;
   for (i = 0;i < P.lim; i++) {
-    int r = strcmp(P.ps[i].nome, nome); // r == 0 se nome do produto == nome
+    int r = strcmp(P.ps[i].nome, nome);
     if (r == 0) {
       Produto_print(P.ps[i]);
     }
   }
-    
 }
 
+// Faz uma busca de produtos por ano e printa os produtos achados na tela
 int Produtos_buscar_ano(Produtos P, int ano){
   int i = 0;
   for (i = 0;i < P.lim; i++) {
@@ -107,14 +121,14 @@ int Produtos_buscar_ano(Produtos P, int ano){
     
 }
 
-int Produtos_relatorio(Produtos, void*);
-
+// limpa uma string recebida via fgets, tirando a quebra de linha do final e adicionando um null byte
 void cleanup(char* str) {
   if (strlen(str) > 0 && str[strlen(str) - 1] == '\n') {
     str[strlen(str)-1] = '\0';
   }
 }
 
+// Cadastra um produto no array P->ps
 void cadastrar_produto(Produtos *P) {
   Produto p;
   printf("\n==== CADASTRO DE PRODUTO ====\n");
@@ -152,7 +166,7 @@ void cadastrar_produto(Produtos *P) {
   handle_err(rc);
 }
 
-
+// exclui um produto do array P->ps
 void excluir_produto(Produtos* P) {
   printf("\n*** Excluir produto ***\n");
   printf("Digite o codigo do produto: ");
@@ -162,6 +176,7 @@ void excluir_produto(Produtos* P) {
   handle_err(Produtos_excluir(P, c));
 }
 
+// Submenu de buscas
 void buscar_produto_menu() {
   printf("\n==== OPCOES DE BUSCA ====\n");
   printf("1. Buscar por nome\n");
@@ -170,7 +185,7 @@ void buscar_produto_menu() {
   printf("6. Voltar para o menu inicial\n");
 }
 
-
+// faz validações de diferentes opções para determinar qual das funções de busca chamar
 void buscar_produto(Produtos P){
   int op = 0;
   char buf[10];
@@ -209,6 +224,7 @@ void buscar_produto(Produtos P){
   }
 }
 
+// Busca os produtos que estão em determinada faixa de preço
 int Produtos_buscar_preco(Produtos P, float min, float max) {
   int i = 0;
   for(i = 0; i < P.lim; i++) {
@@ -218,6 +234,7 @@ int Produtos_buscar_preco(Produtos P, float min, float max) {
   }
 }
 
+// printa a quantidade de produtos por gênero
 int Produtos_qtd_produtos_genero(Produtos P) {
   int i = 0;
   char* generos[P.lim*2];
@@ -248,6 +265,8 @@ int Produtos_qtd_produtos_genero(Produtos P) {
   }
 }
 
+// Imprime na tela um relatório contendo os preços em determinada faixa de preço
+// e a quantidade de produtos por gênero
 void relatorio(Produtos P) {
   printf("\n*** Relatorio ***\n");
   float p_min = 0;
@@ -268,6 +287,7 @@ void relatorio(Produtos P) {
   handle_err(Produtos_qtd_produtos_genero(P));
 }
 
+// menu principal
 void menu() {
   printf("\n==== SUPERMERCADO STO ANTONIO ====\nMenu Principal\n");
   printf("1. Cadastrar produto\n");
